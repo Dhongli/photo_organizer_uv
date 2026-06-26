@@ -8,3 +8,13 @@ wheels/
 
 # Virtual environments
 .venv
+
+# IDE
+.idea/
+
+# PyInstaller
+*.spec
+
+# Backup files
+*.bak
+requirements.txtbak

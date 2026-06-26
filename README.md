@@ -166,7 +166,7 @@ uv run pyinstaller --onefile --windowed --name "PhotoOrganizer" photo_organizer_
 |---|---|---|
 | `ffmpeg` / `ffprobe` | 仅视频必需 | 提取视频创建时间 |
 
-> 不处理视频可跳过安装 ffmpeg，图片和文件名识别不受影响。
+> 视频文件名通常也带时间戳，不需要 ffmpeg。只有文件名无时间信息时才需要安装 ffmpeg 读取视频元数据。
 
 ---
 
