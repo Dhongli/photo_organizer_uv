@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Optional
 
 
-SUPPORTED_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.heic', '.mp4', '.mov', '.gif'}
+SUPPORTED_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.heic', '.mp4', '.mov', '.gif', '.dng', '.cr2', '.nef', '.arw'}
 # ⚠️ 只排除这些目录；"待检测" 会被处理！
 EXCLUDE_FOLDERS = {'归档', 'Archive', '未识别'}
 
@@ -162,12 +162,14 @@ def safe_move(src: Path, dest_dir: Path) -> Path:
     shutil.move(str(src), str(dest))
     return dest
 
-def main(photo_dir: Path, no_log: bool = False):
+def main(photo_dir: Path, no_log: bool = False, log_callback=None):
     has_heif = setup_heif_support()
     log_lines = []
     def log(msg: str, level: str = "INFO"):
         line = f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] [{level}] {msg}"
         print(line)
+        if log_callback:
+            log_callback(line)
         if not no_log:
             log_lines.append(line)
 
@@ -191,8 +193,9 @@ def main(photo_dir: Path, no_log: bool = False):
         filtered_files.append(f)
 
     if not filtered_files:
-        log("未找到任何待处理的媒体文件（已跳过“归档”等目录）", "WARN")
-        input("\n按回车退出...")
+        log("未找到任何待处理的媒体文件（已跳过\u201c归档\u201d等目录）", "WARN")
+        if not log_callback:
+            input("\n按回车退出...")
         return
 
     log(f"开始处理目录: {photo_dir}")
@@ -209,7 +212,7 @@ def main(photo_dir: Path, no_log: bool = False):
         source_time = None
         method = ""
 
-        if file_path.suffix.lower() in {'.jpg', '.jpeg', '.png', '.heic'}:
+        if file_path.suffix.lower() in {'.jpg', '.jpeg', '.png', '.heic', '.dng', '.cr2', '.nef', '.arw'}:
             source_time = get_exif_time(file_path)
             if source_time:
                 method = "EXIF"
@@ -252,7 +255,8 @@ def main(photo_dir: Path, no_log: bool = False):
             f.write('\n'.join(log_lines))
         print(f"\n📝 日志已保存至: {log_file}")
 
-    input("\n按回车退出...")
+    if not log_callback:
+        input("\n按回车退出...")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="照片/视频自动归档工具")
